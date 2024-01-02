@@ -1,0 +1,79 @@
+function DodajJedynki {
+    param (
+        [string]$krokDodawania,
+        [int]$indeksPlusa
+    )
+
+    $jedynki = ""
+
+    for ($i = 0; $i -lt $indeksPlusa; $i++) {
+        if ($krokDodawania[$i] -eq "+") {
+            $jedynki += "1"
+        } else {
+            $jedynki += " "
+        }
+    }
+
+    return $jedynki
+}
+
+function DodajPisemnie {
+    param (
+        [string]$a,
+        [string]$b
+    )
+
+    $aCzesci = $a.Split('.')
+    $bCzesci = $b.Split('.')
+
+    $liczbaCzesci = [Math]::Max($aCzesci.Length, $bCzesci.Length)
+
+    $maksDlugosc = 0
+
+    for ($i = 0; $i -lt $liczbaCzesci; $i++) {
+        $maksDlugosc = [Math] Maximum($maksDlugosc, $aCzesci[$i].Length, $bCzesci[$i].Length)
+    }
+
+    $wynik = ""
+    $przeniesienie = 0
+
+    for ($i = 0; $i -lt $liczbaCzesci; $i++) {
+        $czescA = if ($i -lt $aCzesci.Length) { $aCzesci[$i] } else { "0" }
+        $czescB = if ($i -lt $bCzesci.Length) { $bCzesci[$i] } else { "0" }
+
+        $czescA = $czescA.PadRight($maksDlugosc, '0')
+        $czescB = $czescB.PadRight($maksDlugosc, '0')
+
+        $krokDodawania = ""
+        $sumaCzesci = [Math]::Max([int]$czescA, [int]$czescB) + $przeniesienie
+
+        for ($j = $maksDlugosc - 1; $j -ge 0; $j--) {
+            $cyfraA = [int]$czescA[$j]
+            $cyfraB = [int]$czescB[$j]
+
+            $suma = $cyfraA + $cyfraB + $przeniesienie
+            $cyfraWyniku = $suma % 10
+            $przeniesienie = [Math]::Floor($suma / 10)
+
+            $krokDodawania = "$cyfraA + $cyfraB + $przeniesienie = $cyfraWyniku" + $krokDodawania
+            $wynik = $krokDodawania.PadLeft(($maksDlugosc + 1) * 13) + "`r`n" + $wynik
+        }
+
+        if ($przeniesienie -gt 0) {
+            $krokDodawania = "$przeniesienie"
+            $wynik = $krokDodawania.PadLeft(($maksDlugosc + 1) * 13) + "`r`n" + $wynik
+        }
+
+        $liniaOddzielajaca = "=" * (($maksDlugosc + 1) * 13)
+        $wynik = $liniaOddzielajaca + "`r`n" + $wynik
+    }
+
+    return $wynik
+}
+
+# Pobierz dwie liczby od użytkownika
+$a = Read-Host "Podaj pierwszą liczbę"
+$b = Read-Host "Podaj drugą liczbę"
+
+# Wyświetl wynik dodawania pisemnego
+Write-Host (DodajPisemnie -a $a -b $b)
